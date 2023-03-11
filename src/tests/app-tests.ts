@@ -1,8 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert';
+import {requestSinglePoint} from '../app/request';
 
-test('api is online & responding', () => {
-  assert.fail();
+test('api is online & responding', async () => {
+  const response = await requestSinglePoint(0, 0);
+
+  console.log(response?.data);
+
+  assert(response?.data != null || response?.data != undefined);
+  assert(response.status >= 200 || response.status <= 299);
 });
 
 test('api returns expected response format', () => {
