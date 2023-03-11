@@ -1,10 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import {
-  requestSinglePoint,
-  parseResponse,
-  ResponseResult,
-} from '../app/request';
+import {requestSinglePoint, parseResponse} from '../app/request';
+import {generateCoordinates} from '../app/coordinate-generator';
 import {AxiosResponse} from 'axios';
 
 test('api is online & responding', async () => {
@@ -42,12 +39,10 @@ test('api response parses to expected response format', async () => {
   );
 });
 
-test('api returns valid response for missing coordinates', () => {
-  assert.fail();
-});
-
 test('generates exactly 100 coordinates in total', () => {
-  assert.fail();
+  const coordinates = generateCoordinates(100);
+
+  assert(coordinates.length === 100);
 });
 
 test('only requests sun times for 5 coordinates at a time', () => {
