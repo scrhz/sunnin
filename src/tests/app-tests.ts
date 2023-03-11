@@ -1,20 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import {requestSinglePoint} from '../app/request';
+import {
+  requestSinglePoint,
+  parseResponse,
+  ResponseResult,
+} from '../app/request';
+import {AxiosResponse} from 'axios';
 
 test('api is online & responding', async () => {
   const response = await requestSinglePoint(0, 0);
 
-  console.log(response?.data);
-
-  assert(response?.data != null || response?.data != undefined);
-  assert(response.status >= 200 || response.status <= 299);
+  assert(
+    response?.data != null || response?.data != undefined,
+    'response contains no data'
+  );
+  assert(
+    response.status >= 200 || response.status <= 299,
+    'response status is unsuccessful'
+  );
 });
 
-test('api returns expected response format', () => {
-  //Externally managed API could be changed without warning.
-  //This would increase changes of catching changes to requirements in CI rather than relying on them being caught in release/manual testing
-  assert.fail();
+test('api response parses to expected response format', async () => {
+  const response = (await requestSinglePoint(0, 0)) as AxiosResponse;
+  const result = parseResponse(response);
+
+  assert(
+    result != null || result != undefined,
+    'result was not parsed as valid object'
+  );
+  assert(
+    result.sunrise != null || result.sunrise != undefined,
+    'sunrise was not parsed as valid string'
+  );
+  assert(
+    result.sunset != null || result.sunset != undefined,
+    'sunset was parsed as valid string'
+  );
+  assert(
+    result.day_length != null || result.day_length != undefined,
+    'day_length could not be parsed as valid string'
+  );
 });
 
 test('api returns valid response for missing coordinates', () => {
