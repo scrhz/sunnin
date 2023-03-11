@@ -1,4 +1,5 @@
 import axios, {AxiosResponse} from 'axios';
+import Coordinate from '../app/coordinate-generator';
 
 export interface ResponseResult {
   sunrise: string;
@@ -11,21 +12,24 @@ interface Response {
   status: string;
 }
 
-export async function requestSinglePoint(
-  latitude: number,
-  longitude: number
-): Promise<AxiosResponse | void> {
+const constructUrlForSinglePoint = (coordinate: Coordinate): URL => {
   const baseUrl = new URL('https://api.sunrise-sunset.org/');
 
   baseUrl.pathname = '/json';
-  baseUrl.searchParams.append('lat', latitude.toString());
-  baseUrl.searchParams.append('lng', longitude.toString());
+  baseUrl.searchParams.append('lat', coordinate.latitude.toString());
+  baseUrl.searchParams.append('lng', coordinate.longitude.toString());
 
+  return baseUrl;
+};
+
+export async function requestSinglePoint(
+  coordinate: Coordinate
+): Promise<AxiosResponse | void> {
   try {
-    return await axios.get(baseUrl.toString());
+    return await axios.get(constructUrlForSinglePoint(coordinate).toString());
   } catch (error) {
     console.error(
-      `Error requesting times for latitude ${latitude} & longitude ${longitude}:\n ${error}`
+      `Error requesting times for latitude ${coordinate.latitude} & longitude ${coordinate.longitude}:\n ${error}`
     );
   }
 }

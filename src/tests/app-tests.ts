@@ -5,7 +5,10 @@ import {generateCoordinates} from '../app/coordinate-generator';
 import {AxiosResponse} from 'axios';
 
 test('api is online & responding', async () => {
-  const response = await requestSinglePoint(0, 0);
+  const response = await requestSinglePoint({
+    latitude: 0,
+    longitude: 0,
+  });
 
   assert(
     response?.data != null || response?.data != undefined,
@@ -18,7 +21,10 @@ test('api is online & responding', async () => {
 });
 
 test('api response parses to expected response format', async () => {
-  const response = (await requestSinglePoint(0, 0)) as AxiosResponse;
+  const response = (await requestSinglePoint({
+    latitude: 0,
+    longitude: 0,
+  })) as AxiosResponse;
   const result = parseResponse(response);
 
   assert(
