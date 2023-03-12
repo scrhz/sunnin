@@ -12,35 +12,51 @@ interface Response {
   status: string;
 }
 
-const constructUrlForCoordinate = (coordinate: Coordinate): URL => {
-  const baseUrl = new URL('https://api.sunrise-sunset.org/');
+interface DataPoint {
+  coordinate: Coordinate;
+  responseResult: ResponseResult;
+}
 
-  baseUrl.pathname = '/json';
-  baseUrl.searchParams.append('lat', coordinate.latitude.toString());
-  baseUrl.searchParams.append('lng', coordinate.longitude.toString());
+export const requestTimesForCoordinate = async (
+  coordinate: Coordinate
+): Promise<DataPoint> => {
+  const baseUrl = 'https://api.sunrise-sunset.org/json';
 
-  return baseUrl;
+  const request = await axios
+    .get(baseUrl, {
+      params: {
+        lat: coordinate.latitude.toString(),
+        lng: coordinate.longitude.toString(),
+        formatted: 0,
+      },
+    })
+    .catch((error) => {
+      throw Error(
+        `Error requesting coordinate of latitude ${coordinate.latitude} longitude ${coordinate.longitude}: \n${error}`
+      );
+    });
+
+  return {
+    coordinate,
+    responseResult: parseResponse(request),
+  };
 };
 
-export async function requestTimesForCoordinates(
+export const groupRequestsForCoordinates = async (
   coordinates: Coordinate[]
-): Promise<AxiosResponse[] | void> {
-  const urls = coordinates.map((coordinate) => {
-    return constructUrlForCoordinate(coordinate);
-  });
+): Promise<DataPoint[]> => {
+  const coordinateRequests = coordinates.map((coordinate) =>
+    requestTimesForCoordinate(coordinate)
+  );
 
-  const requestUrls = urls.map((url) => {
-    return axios.get(url.toString());
-  });
+  const batchResult = await Promise.all(coordinateRequests);
 
-  try {
-    return await axios.all(requestUrls).catch((error) => {
-      console.log(error);
-    });
-  } catch (error) {
-    console.error(`Error requesting times for urls ${requestUrls}:\n ${error}`);
+  if (batchResult) {
+    return batchResult;
+  } else {
+    throw Error(`Error assigning responses as DataPoints`);
   }
-}
+};
 
 export const parseResponse = (response: AxiosResponse): ResponseResult => {
   const mainResponse = response.data as Response;
@@ -49,4 +65,48 @@ export const parseResponse = (response: AxiosResponse): ResponseResult => {
   } else {
     throw Error(`Error parsing response: \n ${response}`);
   }
+};
+
+export const createPoints = async (
+  numberOfPoints: number
+): Promise<DataPoint[]> => {
+  const groups = createCoordinateGroups(numberOfPoints);
+  let dataPoints: DataPoint[][] = [];
+
+  for (const group of groups) {
+    const points = await groupRequestsForCoordinates(group);
+    dataPoints.push(points);
+  }
+
+  return dataPoints.flat();
+};
+
+export const getEarliestSunrise = (dataPoints: DataPoint[]): DataPoint => {
+  return dataPoints.reduce((previous, current) =>
+    parseSunrise(previous.responseResult) < parseSunrise(current.responseResult)
+      ? previous
+      : current
+  );
+};
+
+const parseSunrise = (result: ResponseResult): number => {
+  const date = Date.parse(result.sunrise);
+  if (date) {
+    return date;
+  } else {
+    throw Error(
+      `Error parsing sunrise time for result: \n ${JSON.stringify(
+        result.sunrise
+      )}`
+    );
+  }
+};
+
+export const printDataForPoint = (dataPoint: DataPoint) => {
+  console.log(
+    `Data for coordinate: ${dataPoint.coordinate.latitude} : ${dataPoint.coordinate.longitude}`
+  );
+  console.log(`Sunrise: ${dataPoint.responseResult.sunrise}\n`);
+  console.log(`Sunset: ${dataPoint.responseResult.sunset}\n`);
+  console.log(`Day length: ${dataPoint.responseResult.day_length}\n\n`);
 };
