@@ -1,5 +1,5 @@
 import axios, {AxiosResponse} from 'axios';
-import Coordinate from '../app/coordinate-generator';
+import Coordinate, {createCoordinateGroups} from '../app/coordinate-generator';
 
 export interface ResponseResult {
   sunrise: string;
