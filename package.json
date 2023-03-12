@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "run": "tsc && node dist/app/app.js",
     "test": "node --test --require ts-node/register src/tests/app-tests.ts"
   },
   "repository": {
