@@ -12,7 +12,7 @@ interface Response {
   status: string;
 }
 
-const constructUrlForSinglePoint = (coordinate: Coordinate): URL => {
+const constructUrlForCoordinate = (coordinate: Coordinate): URL => {
   const baseUrl = new URL('https://api.sunrise-sunset.org/');
 
   baseUrl.pathname = '/json';
@@ -22,15 +22,23 @@ const constructUrlForSinglePoint = (coordinate: Coordinate): URL => {
   return baseUrl;
 };
 
-export async function requestSinglePoint(
-  coordinate: Coordinate
-): Promise<AxiosResponse | void> {
+export async function requestTimesForCoordinates(
+  coordinates: Coordinate[]
+): Promise<AxiosResponse[] | void> {
+  const urls = coordinates.map((coordinate) => {
+    return constructUrlForCoordinate(coordinate);
+  });
+
+  const requestUrls = urls.map((url) => {
+    return axios.get(url.toString());
+  });
+
   try {
-    return await axios.get(constructUrlForSinglePoint(coordinate).toString());
+    return await axios.all(requestUrls).catch((error) => {
+      console.log(error);
+    });
   } catch (error) {
-    console.error(
-      `Error requesting times for latitude ${coordinate.latitude} & longitude ${coordinate.longitude}:\n ${error}`
-    );
+    console.error(`Error requesting times for urls ${requestUrls}:\n ${error}`);
   }
 }
 

@@ -1,31 +1,36 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import {requestSinglePoint, parseResponse} from '../app/request';
+import {requestTimesForCoordinates, parseResponse} from '../app/request';
 import {generateCoordinates} from '../app/coordinate-generator';
 import {AxiosResponse} from 'axios';
 
 test('api is online & responding', async () => {
-  const response = await requestSinglePoint({
-    latitude: 0,
-    longitude: 0,
-  });
+  const responses = (await requestTimesForCoordinates([
+    {
+      latitude: 0,
+      longitude: 0,
+    },
+  ])) as AxiosResponse[];
 
+  assert(responses.length, 'no response returned');
   assert(
-    response?.data != null || response?.data != undefined,
+    responses[0].data != null || responses[0].data != undefined,
     'response contains no data'
   );
   assert(
-    response.status >= 200 || response.status <= 299,
+    responses[0].status >= 200 || responses[0].status <= 299,
     'response status is unsuccessful'
   );
 });
 
 test('api response parses to expected response format', async () => {
-  const response = (await requestSinglePoint({
-    latitude: 0,
-    longitude: 0,
-  })) as AxiosResponse;
-  const result = parseResponse(response);
+  const responses = (await requestTimesForCoordinates([
+    {
+      latitude: 0,
+      longitude: 0,
+    },
+  ])) as AxiosResponse[];
+  const result = parseResponse(responses[0]);
 
   assert(
     result != null || result != undefined,
