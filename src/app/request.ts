@@ -12,7 +12,7 @@ export const requestTimesForCoordinate = async (
       params: {
         lat: coordinate.latitude.toString(),
         lng: coordinate.longitude.toString(),
-        formatted: 0,
+        formatted: 1,
       },
     })
     .catch((error) => {

@@ -13,7 +13,7 @@ const findSunTimes = async () => {
   );
   console.log(`Sun rises at ${earliestSunrisePoint.responseResult.sunrise}`);
   console.log(
-    `Length of day is ${earliestSunrisePoint.responseResult.day_length} seconds`
+    `Length of day is ${earliestSunrisePoint.responseResult.day_length}`
   );
 };
 
