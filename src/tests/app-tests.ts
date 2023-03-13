@@ -1,65 +1,95 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import {requestTimesForCoordinates, parseResponse} from '../app/request';
-import {generateCoordinates} from '../app/coordinate-generator';
-import {AxiosResponse} from 'axios';
+import {requestTimesForCoordinate} from '../app/request';
+import {
+  createCoordinateGroups,
+  generateRandomCoordinates,
+} from '../app/coordinate-generator';
+import {DataPoint, getEarliestSunrise} from '../app/response';
 
-test('api is online & responding', async () => {
-  const responses = (await requestTimesForCoordinates([
-    {
-      latitude: 0,
-      longitude: 0,
-    },
-  ])) as AxiosResponse[];
+test('api response is parsed to expected format', async () => {
+  const dataPoint = await requestTimesForCoordinate({
+    latitude: 0,
+    longitude: 0,
+  });
 
-  assert(responses.length, 'no response returned');
+  assert(dataPoint, 'no response returned');
   assert(
-    responses[0].data != null || responses[0].data != undefined,
-    'response contains no data'
+    dataPoint.coordinate != null || dataPoint.coordinate != undefined,
+    'response '
   );
-  assert(
-    responses[0].status >= 200 || responses[0].status <= 299,
-    'response status is unsuccessful'
-  );
-});
-
-test('api response parses to expected response format', async () => {
-  const responses = (await requestTimesForCoordinates([
-    {
-      latitude: 0,
-      longitude: 0,
-    },
-  ])) as AxiosResponse[];
-  const result = parseResponse(responses[0]);
 
   assert(
-    result != null || result != undefined,
-    'result was not parsed as valid object'
-  );
-  assert(
-    result.sunrise != null || result.sunrise != undefined,
+    dataPoint.responseResult.sunrise != null ||
+      dataPoint.responseResult.sunrise != undefined,
     'sunrise was not parsed as valid string'
   );
   assert(
-    result.sunset != null || result.sunset != undefined,
+    dataPoint.responseResult.sunset != null ||
+      dataPoint.responseResult.sunset != undefined,
     'sunset was parsed as valid string'
   );
   assert(
-    result.day_length != null || result.day_length != undefined,
+    dataPoint.responseResult.day_length != null ||
+      dataPoint.responseResult.day_length != undefined,
     'day_length could not be parsed as valid string'
   );
 });
 
 test('generates exactly 100 coordinates in total', () => {
-  const coordinates = generateCoordinates(100);
+  const coordinates = generateRandomCoordinates(100);
 
   assert(coordinates.length === 100);
 });
 
-test('only requests sun times for 5 coordinates at a time', () => {
-  assert.fail();
+test('groups for 5 data points at a time and retains remainder', () => {
+  const groups = createCoordinateGroups(9);
+
+  assert(
+    groups.find((group) => group.length === 5),
+    'did not split groups to requirement of 5 coordinates'
+  );
+  assert(
+    groups.find((group) => group.length === 4),
+    'did not create group with <5 remaining coordinates'
+  );
 });
 
 test('outputs earliest sunrise from all responses', () => {
-  assert.fail();
+  const earliest: DataPoint = {
+    responseResult: {
+      sunrise: '2015-05-21T05:05:35+00:00',
+      sunset: '2015-05-21T05:05:35+00:00',
+      day_length: '0',
+    },
+    coordinate: {latitude: 0, longitude: 0},
+  };
+
+  const later: DataPoint = {
+    responseResult: {
+      sunrise: '2015-05-21T12:05:35+00:00',
+      sunset: '2015-05-21T05:05:35+00:00',
+      day_length: '0',
+    },
+    coordinate: {latitude: 0, longitude: 0},
+  };
+
+  const latest: DataPoint = {
+    responseResult: {
+      sunrise: '2015-05-21T12:10:35+00:00',
+      sunset: '2015-05-21T05:05:35+00:00',
+      day_length: '0',
+    },
+    coordinate: {latitude: 0, longitude: 0},
+  };
+
+  const dataPoints = [later, earliest, latest];
+
+  const earliestSunrisePoint = getEarliestSunrise(dataPoints);
+
+  assert.deepEqual(
+    earliestSunrisePoint,
+    earliest,
+    'did not return earliest sunrise from collection of datapoints'
+  );
 });

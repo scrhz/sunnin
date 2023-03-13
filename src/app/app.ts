@@ -1,4 +1,5 @@
-import {createPoints, getEarliestSunrise, printDataForPoint} from './request';
+import {createPoints} from './request';
+import {getEarliestSunrise, printDataForPoint} from './response';
 
 const findSunTimes = async () => {
   const points = await createPoints(1);
@@ -12,7 +13,7 @@ const findSunTimes = async () => {
   );
   console.log(`Sun rises at ${earliestSunrisePoint.responseResult.sunrise}`);
   console.log(
-    `Length of day is ${earliestSunrisePoint.responseResult.day_length}`
+    `Length of day is ${earliestSunrisePoint.responseResult.day_length} seconds`
   );
 };
 
