@@ -28,21 +28,21 @@ export const parseResponse = (response: AxiosResponse): ResponseResult => {
 
 export const getEarliestSunrise = (dataPoints: DataPoint[]): DataPoint => {
   return dataPoints.reduce((previous, current) =>
-    parseSunrise(previous.responseResult) < parseSunrise(current.responseResult)
-      ? previous
-      : current
+    parseSunrise(previous) < parseSunrise(current) ? previous : current
   );
 };
 
-const parseSunrise = (result: ResponseResult): number => {
-  const date = Date.parse(result.sunrise);
-  if (date) {
+const parseSunrise = (dataPoint: DataPoint): number => {
+  const date = Date.parse(dataPoint.responseResult.sunrise);
+  if (date != null && date != undefined) {
     return date;
   } else {
     throw Error(
       `Error parsing sunrise time for result: \n ${JSON.stringify(
-        result.sunrise
-      )}`
+        dataPoint.responseResult.sunrise
+      )}\n Latitude: ${dataPoint.coordinate.latitude} \n Longitude: ${
+        dataPoint.coordinate.longitude
+      }`
     );
   }
 };
@@ -51,7 +51,7 @@ export const printDataForPoint = (dataPoint: DataPoint) => {
   console.log(
     `Data for coordinate: ${dataPoint.coordinate.latitude} : ${dataPoint.coordinate.longitude}`
   );
-  console.log(`Sunrise: ${dataPoint.responseResult.sunrise}\n`);
-  console.log(`Sunset: ${dataPoint.responseResult.sunset}\n`);
-  console.log(`Day length: ${dataPoint.responseResult.day_length}\n\n`);
+  console.log(`Sunrise: ${dataPoint.responseResult.sunrise}`);
+  console.log(`Sunset: ${dataPoint.responseResult.sunset}`);
+  console.log(`Day length: ${dataPoint.responseResult.day_length}\n`);
 };

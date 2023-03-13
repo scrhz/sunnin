@@ -5,8 +5,8 @@ export default interface Coordinate {
 
 const randomCoordinate = (): Coordinate => {
   const coordinate: Coordinate = {
-    latitude: Math.random() * 90,
-    longitude: Math.random() * 180,
+    latitude: (Math.random() - 0.5) * 180,
+    longitude: (Math.random() - 0.5) * 360,
   };
 
   return coordinate;

@@ -12,5 +12,5 @@ A CLI app that retrieves & prints a list of sunrise & sunset times for 100 rando
 
 1. Make sure you have node and npm installed and in your PATH.
 2. Clone the repository and run `npm install` from the repo root directory.
-3. Run `npm run run` to run the main app script and output 100 random sunset times, followed by the earliest time.
+3. Run `npm run-script run` (or `npm run run`) to retrieve & output 100 random sunset times, followed by the earliest time.
 4. Run `npm run test` to run tests.
