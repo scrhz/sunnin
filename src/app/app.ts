@@ -2,7 +2,7 @@ import {createPoints} from './request';
 import {getEarliestSunrise, printDataForPoint} from './response';
 
 const findSunTimes = async () => {
-  const points = await createPoints(1);
+  const points = await createPoints(100);
 
   points.forEach((point) => printDataForPoint(point));
 
